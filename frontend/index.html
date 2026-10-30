@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>URL Shortener | First-Principles Backend</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">URL Shortener</h1>
+          <p class="brand-subtitle">First-Principles Backend Engineering Web Interface</p>
+        </div>
+      </div>
+
+      <!-- Backend Connection Status Pill -->
+      <div class="api-status-widget">
+        <div class="status-indicator">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-text" id="statusText">Checking Backend...</span>
+        </div>
+        <button id="configToggleBtn" class="btn-icon" title="Configure Backend Host" aria-label="Configure Host">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Backend Host Configuration Drawer (Collapsible) -->
+    <div id="configDrawer" class="config-drawer hidden">
+      <div class="config-drawer-content">
+        <label for="apiUrlInput"><strong>Backend Base URL:</strong></label>
+        <div class="input-inline">
+          <input type="text" id="apiUrlInput" value="http://localhost:8000" placeholder="e.g. http://localhost:8000" />
+          <button id="saveApiUrlBtn" class="btn btn-secondary">Save & Reconnect</button>
+        </div>
+        <small class="helper-text">Ensure your backend server is running via <code>python main.py</code>.</small>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="shortenTab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+        </svg>
+        Shorten URL
+      </button>
+      <button class="tab-btn" data-tab="analyticsTab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        Analytics Inspector
+      </button>
+      <button class="tab-btn" data-tab="backendInfoTab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+          <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+          <line x1="6" y1="6" x2="6.01" y2="6"></line>
+          <line x1="6" y1="18" x2="6.01" y2="18"></line>
+        </svg>
+        Architecture & Health
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <!-- Alert / Notification Toast -->
+      <div id="notification" class="notification hidden"></div>
+
+      <!-- TAB 1: Shorten URL -->
+      <section id="shortenTab" class="tab-content active">
+        <div class="card">
+          <div class="card-header">
+            <h2>Generate Short Link</h2>
+            <p>Converts long URLs into compact Base62 keys or custom aliases.</p>
+          </div>
+
+          <form id="shortenForm" class="form">
+            <div class="form-group">
+              <label for="longUrlInput">Destination Long URL <span class="required">*</span></label>
+              <div class="input-with-action">
+                <input
+                  type="url"
+                  id="longUrlInput"
+                  placeholder="https://example.com/very/long/path/document?id=12345"
+                  required
+                  autocomplete="off"
+                />
+                <button type="button" id="pasteBtn" class="btn-subtle" title="Paste from clipboard">Paste</button>
+              </div>
+              <small class="helper-text">Must include <code>http://</code> or <code>https://</code>.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="aliasInput">
+                Custom Short Key / Alias
+                <span class="optional-badge">Optional</span>
+              </label>
+              <div class="alias-input-wrapper">
+                <span class="alias-prefix" id="aliasPrefix">http://localhost:8000/</span>
+                <input
+                  type="text"
+                  id="aliasInput"
+                  placeholder="my-cool-link"
+                  pattern="[a-zA-Z0-9_-]{3,30}"
+                  autocomplete="off"
+                />
+              </div>
+              <small class="helper-text">3 to 30 alphanumeric characters, hyphens, or underscores. Leave empty to auto-generate a Base62 key.</small>
+            </div>
+
+            <button type="submit" id="shortenSubmitBtn" class="btn btn-primary btn-block">
+              <span class="btn-text">Shorten URL</span>
+              <span class="btn-spinner hidden"></span>
+            </button>
+          </form>
+
+          <!-- Result Box -->
+          <div id="shortenResult" class="result-box hidden">
+            <div class="result-badge">Link Created Successfully!</div>
+            <div class="short-url-display">
+              <input type="text" id="resultShortUrl" readonly />
+              <button id="copyShortUrlBtn" class="btn btn-secondary">
+                <span class="copy-text">Copy Link</span>
+              </button>
+              <a id="visitShortUrlBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+                Visit (Test 302) ↗
+              </a>
+            </div>
+
+            <div class="result-details">
+              <div class="detail-item">
+                <span class="detail-label">Original Destination:</span>
+                <a id="resultOriginalUrl" href="#" target="_blank" class="detail-link"></a>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Short Key:</span>
+                <code id="resultShortKey"></code>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Created At:</span>
+                <span id="resultCreatedAt"></span>
+              </div>
+            </div>
+
+            <div class="result-actions">
+              <button id="viewCreatedStatsBtn" class="btn btn-subtle-primary">
+                View Real-Time Click Stats 📊
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Links History Card -->
+        <div class="card mt-4">
+          <div class="card-header-split">
+            <div>
+              <h3>Recent Shortened Links</h3>
+              <p>Saved locally in your browser for quick access and tracking.</p>
+            </div>
+            <button id="clearHistoryBtn" class="btn-text-danger" title="Clear saved history">Clear All</button>
+          </div>
+
+          <div id="historyTableContainer" class="table-container">
+            <table class="data-table" id="historyTable">
+              <thead>
+                <tr>
+                  <th>Short Link</th>
+                  <th>Destination URL</th>
+                  <th>Created</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+            <div id="emptyHistory" class="empty-state">
+              <p>No links shortened yet in this browser. Shorten your first link above!</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: Analytics Inspector -->
+      <section id="analyticsTab" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h2>URL Click Analytics Inspector</h2>
+            <p>Query the backend for real-time click volume and audit logs recorded asynchronously.</p>
+          </div>
+
+          <form id="statsLookupForm" class="stats-search-form">
+            <div class="input-with-button">
+              <input
+                type="text"
+                id="statsKeyInput"
+                placeholder="Enter Short Key or paste full Short URL (e.g. 1c9 or my-cool-link)"
+                required
+              />
+              <button type="submit" class="btn btn-primary" id="statsSearchBtn">
+                Inspect Stats
+              </button>
+            </div>
+          </form>
+
+          <!-- Analytics Content -->
+          <div id="statsResultsContainer" class="hidden">
+            <div class="stats-overview-grid">
+              <div class="stat-card">
+                <span class="stat-label">Total Clicks</span>
+                <span class="stat-value" id="statsClickCount">0</span>
+                <span class="stat-subtext">HTTP 302 redirects resolved</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Short Key</span>
+                <span class="stat-value text-accent" id="statsKeyDisplay">-</span>
+                <span class="stat-subtext">Base62 or Custom Alias</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Created</span>
+                <span class="stat-value-sm" id="statsCreatedDisplay">-</span>
+                <span class="stat-subtext">Original generation timestamp</span>
+              </div>
+            </div>
+
+            <div class="stats-meta-row">
+              <strong>Target URL:</strong>
+              <a id="statsTargetUrl" href="#" target="_blank" rel="noopener noreferrer"></a>
+            </div>
+
+            <div class="recent-events-section">
+              <div class="events-header">
+                <h4>Recent Click Events (Async Audit Log)</h4>
+                <button id="refreshStatsBtn" class="btn-subtle" title="Refresh analytics">Refresh ⟳</button>
+              </div>
+
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Referrer</th>
+                      <th>User Agent</th>
+                    </tr>
+                  </thead>
+                  <tbody id="eventsTableBody">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
+                <div id="noEventsState" class="empty-state hidden">
+                  <p>No clicks registered yet for this short key. Try opening the short link to record a click!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: Backend Info & Health Check -->
+      <section id="backendInfoTab" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h2>Backend Architecture & Health</h2>
+            <p>Real-time status of your First-Principles URL Shortener services and layers.</p>
+          </div>
+
+          <div class="health-grid">
+            <div class="health-item">
+              <span class="health-label">API Health Status:</span>
+              <span id="healthStatusText" class="badge badge-success">Checking...</span>
+            </div>
+            <div class="health-item">
+              <span class="health-label">Service Name:</span>
+              <span id="healthServiceName" class="health-val">-</span>
+            </div>
+            <div class="health-item">
+              <span class="health-label">In-Memory Cache Size:</span>
+              <span id="healthCacheCount" class="health-val">-</span>
+            </div>
+            <div class="health-item">
+              <span class="health-label">Last API Latency:</span>
+              <span id="healthLatency" class="health-val">-</span>
+            </div>
+          </div>
+
+          <div class="backend-explanation-box">
+            <h3>Architecture Explained</h3>
+            <div class="explanation-grid">
+              <div class="expl-card">
+                <h4>1. Transport Layer (FastAPI)</h4>
+                <p>Located in <code>app/api/endpoints/url.py</code>. Exposes clean REST endpoints (<code>POST /api/shorten</code>, <code>GET /api/stats/{key}</code>) and handles HTTP 302 redirects.</p>
+              </div>
+              <div class="expl-card">
+                <h4>2. Business Logic Layer</h4>
+                <p>Located in <code>app/services/shortener_service.py</code>. Validates protocols, runs deduplication checks, and coordinates Base62 encoding.</p>
+              </div>
+              <div class="expl-card">
+                <h4>3. Bijective Base62 Algorithm</h4>
+                <p>Located in <code>app/core/base62.py</code>. Maps integer IDs to <code>[0-9a-zA-Z]</code> with zero collisions.</p>
+              </div>
+              <div class="expl-card">
+                <h4>4. Cache-Aside Layer</h4>
+                <p>Located in <code>app/core/cache.py</code>. High-speed in-memory LRU cache to absorb read traffic before touching the DB.</p>
+              </div>
+              <div class="expl-card">
+                <h4>5. Data Access Layer (WAL Mode)</h4>
+                <p>Located in <code>app/db/repositories.py</code>. SQLite with Write-Ahead Logging allows concurrent reads and high write throughput.</p>
+              </div>
+              <div class="expl-card">
+                <h4>6. Decoupled Frontend (This Folder)</h4>
+                <p>Located in <code>frontend/</code>. Stays 100% separate from your Python code so you can learn pure backend engineering without interference.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Decoupled Web Client for <strong>First-Principles URL Shortener</strong> &bull; Light Minimalist Interface</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
